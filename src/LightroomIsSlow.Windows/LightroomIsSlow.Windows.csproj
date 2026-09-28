@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <AssemblyName>LightroomIsSlow.Windows</AssemblyName>
-    <RootNamespace>LightroomIsSlow.Windows</RootNamespace>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="../LightroomIsSlow.Core/LightroomIsSlow.Core.csproj" />
-  </ItemGroup>
+  <PropertyGroup><AssemblyName>LightroomIsSlow.Windows</AssemblyName><RootNamespace>LightroomIsSlow.Windows</RootNamespace></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../LightroomIsSlow.Core/LightroomIsSlow.Core.csproj" /></ItemGroup>
+  <ItemGroup><PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" /><PackageReference Include="System.Management" Version="8.0.0" /></ItemGroup>
 </Project>
