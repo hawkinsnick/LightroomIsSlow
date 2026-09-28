@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>LightroomIsSlow.Windows</AssemblyName>
+    <RootNamespace>LightroomIsSlow.Windows</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../LightroomIsSlow.Core/LightroomIsSlow.Core.csproj" />
+  </ItemGroup>
+</Project>
