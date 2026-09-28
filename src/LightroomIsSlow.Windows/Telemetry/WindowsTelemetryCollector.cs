@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using LightroomIsSlow.Core.Abstractions;
 using LightroomIsSlow.Core.Models;
 
@@ -6,47 +7,31 @@ namespace LightroomIsSlow.Windows.Telemetry;
 
 public sealed class WindowsTelemetryCollector : ITelemetryCollector
 {
-    private ProcessIdentity? _target;
-    private Process? _process;
-    private TimeSpan _lastCpu;
-    private DateTimeOffset _lastAt;
+    private ProcessIdentity? _target; private Process? _process; private TimeSpan _lastProcessCpu; private TimeSpan _lastSystemIdle; private TimeSpan _lastSystemKernel; private TimeSpan _lastSystemUser; private DateTimeOffset _lastAt;
 
-    public ValueTask InitializeAsync(ProcessIdentity? lightroomProcess, CancellationToken cancellationToken=default)
+    public ValueTask InitializeAsync(ProcessIdentity? target,CancellationToken ct=default)
     {
-        _target=lightroomProcess;
-        if(_target is not null)
-        {
-            try { _process=Process.GetProcessById(_target.ProcessId); _lastCpu=_process.TotalProcessorTime; _lastAt=DateTimeOffset.UtcNow; }
-            catch { _process=null; }
-        }
+        _target=target; _lastAt=DateTimeOffset.UtcNow; ReadSystemTimes(out _lastSystemIdle,out _lastSystemKernel,out _lastSystemUser);
+        if(target is not null) try{_process=Process.GetProcessById(target.ProcessId);_lastProcessCpu=_process.TotalProcessorTime;}catch{_process=null;}
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask<TelemetrySample> CollectAsync(string sessionId, CancellationToken cancellationToken=default)
+    public ValueTask<TelemetrySample> CollectAsync(string sessionId,CancellationToken ct=default)
     {
-        var now=DateTimeOffset.UtcNow;
-        double? processCpu=null;
-        if(_process is not null)
-        {
-            try
-            {
-                _process.Refresh();
-                var cpu=_process.TotalProcessorTime;
-                var elapsed=(now-_lastAt).TotalMilliseconds;
-                if(elapsed>0) processCpu=Math.Clamp((cpu-_lastCpu).TotalMilliseconds/(elapsed*Environment.ProcessorCount)*100,0,100);
-                _lastCpu=cpu; _lastAt=now;
-            } catch { processCpu=null; }
-        }
-
-        var gc=GC.GetGCMemoryInfo();
-        var totalMb=gc.TotalAvailableMemoryBytes>0?gc.TotalAvailableMemoryBytes/1048576d:(double?)null;
-        return ValueTask.FromResult(new TelemetrySample
-        {
-            TimestampUtc=now, SessionId=sessionId, LightroomProcessId=_target?.ProcessId,
-            CpuLightroomPercent=processCpu,
-            MemoryAvailableMb=totalMb
-        });
+        var now=DateTimeOffset.UtcNow; double? pcpu=null,scpu=null;
+        if(_process is not null) try{_process.Refresh();var cpu=_process.TotalProcessorTime;var ms=(now-_lastAt).TotalMilliseconds;if(ms>0)pcpu=Math.Clamp((cpu-_lastProcessCpu).TotalMilliseconds/(ms*Environment.ProcessorCount)*100,0,100);_lastProcessCpu=cpu;}catch{}
+        if(ReadSystemTimes(out var idle,out var kernel,out var user)){var idleD=(idle-_lastSystemIdle).Ticks;var totalD=(kernel-_lastSystemKernel).Ticks+(user-_lastSystemUser).Ticks;if(totalD>0)scpu=Math.Clamp((1d-idleD/(double)totalD)*100,0,100);_lastSystemIdle=idle;_lastSystemKernel=kernel;_lastSystemUser=user;}
+        GlobalMemoryStatusEx(out var mem);
+        _lastAt=now;
+        return ValueTask.FromResult(new TelemetrySample{TimestampUtc=now,SessionId=sessionId,LightroomProcessId=_target?.ProcessId,CpuSystemPercent=scpu,CpuLightroomPercent=pcpu,MemoryAvailableMb=mem.ullAvailPhys/1048576d,MemoryCommitPercent=mem.ullTotalPageFile==0?null:(mem.ullTotalPageFile-mem.ullAvailPageFile)*100d/mem.ullTotalPageFile});
     }
 
-    public ValueTask DisposeAsync() { _process?.Dispose(); return ValueTask.CompletedTask; }
+    public ValueTask DisposeAsync(){_process?.Dispose();return ValueTask.CompletedTask;}
+
+    [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Auto)] private struct MEMORYSTATUSEX{public uint dwLength;public uint dwMemoryLoad;public ulong ullTotalPhys,ullAvailPhys,ullTotalPageFile,ullAvailPageFile,ullTotalVirtual,ullAvailVirtual,ullAvailExtendedVirtual;}
+    [DllImport("kernel32.dll",SetLastError=true)] private static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
+    private static void GlobalMemoryStatusEx(out MEMORYSTATUSEX m){m=new MEMORYSTATUSEX{dwLength=(uint)Marshal.SizeOf<MEMORYSTATUSEX>()};if(!GlobalMemoryStatusEx(ref m))m=default;}
+    [DllImport("kernel32.dll",SetLastError=true)] private static extern bool GetSystemTimes(out FILETIME idle,out FILETIME kernel,out FILETIME user);
+    [StructLayout(LayoutKind.Sequential)] private struct FILETIME{public uint Low,High;public long Ticks=>((long)High<<32)|Low;public static TimeSpan operator -(FILETIME a,FILETIME b)=>TimeSpan.FromTicks(a.Ticks-b.Ticks);}
+    private static bool ReadSystemTimes(out TimeSpan idle,out TimeSpan kernel,out TimeSpan user){var ok=GetSystemTimes(out var i,out var k,out var u);idle=TimeSpan.FromTicks(i.Ticks);kernel=TimeSpan.FromTicks(k.Ticks);user=TimeSpan.FromTicks(u.Ticks);return ok;}
 }
