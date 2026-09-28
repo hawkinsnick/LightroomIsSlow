@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>LightroomIsSlow.Core</AssemblyName>
+    <RootNamespace>LightroomIsSlow.Core</RootNamespace>
+  </PropertyGroup>
+</Project>
