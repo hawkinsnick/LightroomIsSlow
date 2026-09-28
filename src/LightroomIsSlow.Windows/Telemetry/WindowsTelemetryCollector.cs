@@ -7,7 +7,7 @@ namespace LightroomIsSlow.Windows.Telemetry;
 
 public sealed class WindowsTelemetryCollector : ITelemetryCollector
 {
-    private ProcessIdentity? _target; private Process? _process; private TimeSpan _lastProcessCpu; private TimeSpan _lastSystemIdle; private TimeSpan _lastSystemKernel; private TimeSpan _lastSystemUser; private DateTimeOffset _lastAt;
+    private readonly WindowsPerformanceCounters _perf=new(); private ProcessIdentity? _target; private Process? _process; private TimeSpan _lastProcessCpu; private TimeSpan _lastSystemIdle; private TimeSpan _lastSystemKernel; private TimeSpan _lastSystemUser; private DateTimeOffset _lastAt;
 
     public ValueTask InitializeAsync(ProcessIdentity? target,CancellationToken ct=default)
     {
@@ -23,10 +23,15 @@ public sealed class WindowsTelemetryCollector : ITelemetryCollector
         if(ReadSystemTimes(out var idle,out var kernel,out var user)){var idleD=(idle-_lastSystemIdle).Ticks;var totalD=(kernel-_lastSystemKernel).Ticks+(user-_lastSystemUser).Ticks;if(totalD>0)scpu=Math.Clamp((1d-idleD/(double)totalD)*100,0,100);_lastSystemIdle=idle;_lastSystemKernel=kernel;_lastSystemUser=user;}
         GlobalMemoryStatusEx(out var mem);
         _lastAt=now;
-        return ValueTask.FromResult(new TelemetrySample{TimestampUtc=now,SessionId=sessionId,LightroomProcessId=_target?.ProcessId,CpuSystemPercent=scpu,CpuLightroomPercent=pcpu,MemoryAvailableMb=mem.ullAvailPhys/1048576d,MemoryCommitPercent=mem.ullTotalPageFile==0?null:(mem.ullTotalPageFile-mem.ullAvailPageFile)*100d/mem.ullTotalPageFile});
+        return ValueTask.FromResult(new TelemetrySample{TimestampUtc=now,SessionId=sessionId,LightroomProcessId=_target?.ProcessId,CpuSystemPercent=scpu,CpuLightroomPercent=pcpu,MemoryAvailableMb=mem.ullAvailPhys/1048576d,MemoryCommitPercent=mem.ullTotalPageFile==0?null:(mem.ullTotalPageFile-mem.ullAvailPageFile)*100d/mem.ullTotalPageFile,
+            MemoryHardFaultsPerSecond=PerformanceCounterSet.Read(_perf.Faults),
+            DiskReadBytesPerSecond=PerformanceCounterSet.Read(_perf.DR),DiskWriteBytesPerSecond=PerformanceCounterSet.Read(_perf.DW),
+            DiskReadLatencyMs=PerformanceCounterSet.Read(_perf.DRL,1000),DiskWriteLatencyMs=PerformanceCounterSet.Read(_perf.DWL,1000),DiskQueueDepth=PerformanceCounterSet.Read(_perf.DQ),
+            GpuComputePercent=PerformanceCounterSet.Read(_perf.GU),GpuVramUsedMb=PerformanceCounterSet.Read(_perf.GD,1d/1048576),
+            NetworkReceiveBytesPerSecond=PerformanceCounterSet.Read(_perf.NR),NetworkSendBytesPerSecond=PerformanceCounterSet.Read(_perf.NT)});
     }
 
-    public ValueTask DisposeAsync(){_process?.Dispose();return ValueTask.CompletedTask;}
+    public ValueTask DisposeAsync(){_process?.Dispose();_perf.Dispose();return ValueTask.CompletedTask;}
 
     [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Auto)] private struct MEMORYSTATUSEX{public uint dwLength;public uint dwMemoryLoad;public ulong ullTotalPhys,ullAvailPhys,ullTotalPageFile,ullAvailPageFile,ullTotalVirtual,ullAvailVirtual,ullAvailExtendedVirtual;}
     [DllImport("kernel32.dll",SetLastError=true)] private static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
