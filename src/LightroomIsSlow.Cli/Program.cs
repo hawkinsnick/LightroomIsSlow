@@ -4,6 +4,7 @@ using LightroomIsSlow.Core.Sessions;
 using LightroomIsSlow.Windows.Processes;
 using LightroomIsSlow.Windows.Telemetry;
 using LightroomIsSlow.Windows.Inventory;
+using LightroomIsSlow.Windows.Health;
 
 const string Version="0.9.0";
 var command=args.FirstOrDefault()?.ToLowerInvariant() ?? "help";
@@ -24,7 +25,7 @@ if(command=="record")
     if(i>=0 && i+1<args.Length && int.TryParse(args[i+1],out var parsed) && parsed>0) seconds=parsed;
     var target=detector.Detect().FirstOrDefault();
     var id=DateTimeOffset.UtcNow.ToString("yyyyMMddTHHmmssZ");
-    var metadata=new SessionMetadata{SessionId=id,SchemaVersion="1.0",AppVersion=Version,StartedUtc=DateTimeOffset.UtcNow,SampleInterval=TimeSpan.FromSeconds(1),LightroomProcess=target,System=new WindowsSystemInventoryProvider().Capture(),Provenance=[new("cpu.system","GetSystemTimes"),new("cpu.lightroom","Process.TotalProcessorTime"),new("memory","GlobalMemoryStatusEx"),new("memory.hard_faults","PerformanceCounter","Memory/Page Reads/sec"),new("disk","PerformanceCounter","PhysicalDisk/_Total"),new("network","PerformanceCounter","Network Interface"),new("gpu","PerformanceCounter","GPU Engine / GPU Process Memory")]};
+    var metadata=new SessionMetadata{SessionId=id,SchemaVersion="1.0",AppVersion=Version,StartedUtc=DateTimeOffset.UtcNow,SampleInterval=TimeSpan.FromSeconds(1),LightroomProcess=target,System=new WindowsSystemInventoryProvider().Capture(),WindowsHealth=new WindowsHealthProvider().Capture(),Provenance=[new("cpu.system","GetSystemTimes"),new("cpu.lightroom","Process.TotalProcessorTime"),new("memory","GlobalMemoryStatusEx"),new("memory.hard_faults","PerformanceCounter","Memory/Page Reads/sec"),new("disk","PerformanceCounter","PhysicalDisk/_Total"),new("network","PerformanceCounter","Network Interface"),new("gpu","PerformanceCounter","GPU Engine / GPU Process Memory")]};
     await using var writer=new SessionWriter("sessions",id);
     await using var collector=new WindowsTelemetryCollector();
     var recorder=new SessionRecorder(collector);
