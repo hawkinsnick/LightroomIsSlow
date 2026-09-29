@@ -1,0 +1,1 @@
+using System.Windows; namespace LightroomIsSlow.App; public partial class App:Application{}
