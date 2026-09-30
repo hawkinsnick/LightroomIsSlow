@@ -34,8 +34,8 @@ public sealed class WindowsTelemetryCollector : ITelemetryCollector
     public ValueTask DisposeAsync(){_process?.Dispose();_perf.Dispose();return ValueTask.CompletedTask;}
 
     [StructLayout(LayoutKind.Sequential,CharSet=CharSet.Auto)] private struct MEMORYSTATUSEX{public uint dwLength;public uint dwMemoryLoad;public ulong ullTotalPhys,ullAvailPhys,ullTotalPageFile,ullAvailPageFile,ullTotalVirtual,ullAvailVirtual,ullAvailExtendedVirtual;}
-    [DllImport("kernel32.dll",SetLastError=true)] private static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
-    private static void GlobalMemoryStatusEx(out MEMORYSTATUSEX m){m=new MEMORYSTATUSEX{dwLength=(uint)Marshal.SizeOf<MEMORYSTATUSEX>()};if(!GlobalMemoryStatusEx(ref m))m=default;}
+    [DllImport("kernel32.dll",SetLastError=true)] private static extern bool GlobalMemoryStatusExNative(ref MEMORYSTATUSEX lpBuffer);
+    private static void GlobalMemoryStatusEx(out MEMORYSTATUSEX m){m=new MEMORYSTATUSEX{dwLength=(uint)Marshal.SizeOf<MEMORYSTATUSEX>()};if(!GlobalMemoryStatusExNative(ref m))m=default;}
     [DllImport("kernel32.dll",SetLastError=true)] private static extern bool GetSystemTimes(out FILETIME idle,out FILETIME kernel,out FILETIME user);
     [StructLayout(LayoutKind.Sequential)] private struct FILETIME{public uint Low,High;public long Ticks=>((long)High<<32)|Low;public static TimeSpan operator -(FILETIME a,FILETIME b)=>TimeSpan.FromTicks(a.Ticks-b.Ticks);}
     private static bool ReadSystemTimes(out TimeSpan idle,out TimeSpan kernel,out TimeSpan user){var ok=GetSystemTimes(out var i,out var k,out var u);idle=TimeSpan.FromTicks(i.Ticks);kernel=TimeSpan.FromTicks(k.Ticks);user=TimeSpan.FromTicks(u.Ticks);return ok;}
