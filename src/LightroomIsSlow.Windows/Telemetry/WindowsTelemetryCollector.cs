@@ -12,7 +12,7 @@ public sealed class WindowsTelemetryCollector : ITelemetryCollector
     public ValueTask InitializeAsync(ProcessIdentity? target,CancellationToken ct=default)
     {
         _target=target; _lastAt=DateTimeOffset.UtcNow; ReadSystemTimes(out _lastSystemIdle,out _lastSystemKernel,out _lastSystemUser);
-        if(target is not null) try{_process=Process.GetProcessById(target.ProcessId);_lastProcessCpu=_process.TotalProcessorTime;}catch{_process=null;}
+        if(target is not null) try{_process=Process.GetProcessById(target.ProcessId);_lastProcessCpu=_process.TotalProcessorTime;_perf.BindProcess(target.ProcessId);}catch{_process=null;}
         return ValueTask.CompletedTask;
     }
 
@@ -27,8 +27,8 @@ public sealed class WindowsTelemetryCollector : ITelemetryCollector
             MemoryPageReadsPerSecond=PerformanceCounterSet.Read(_perf.Faults),
             DiskReadBytesPerSecond=PerformanceCounterSet.Read(_perf.DR),DiskWriteBytesPerSecond=PerformanceCounterSet.Read(_perf.DW),
             DiskReadLatencyMs=PerformanceCounterSet.Read(_perf.DRL,1000),DiskWriteLatencyMs=PerformanceCounterSet.Read(_perf.DWL,1000),DiskQueueDepth=PerformanceCounterSet.Read(_perf.DQ),
-            GpuComputePercent=PerformanceCounterSet.Read(_perf.GU),GpuVramUsedMb=PerformanceCounterSet.Read(_perf.GD,1d/1048576),
-            NetworkReceiveBytesPerSecond=PerformanceCounterSet.Read(_perf.NR),NetworkSendBytesPerSecond=PerformanceCounterSet.Read(_perf.NT)});
+            GpuComputePercent=_perf.GpuUtilization(),GpuVramUsedMb=_perf.DedicatedGpuBytes()/1048576d,
+            NetworkReceiveBytesPerSecond=_perf.NetworkReceive(),NetworkSendBytesPerSecond=_perf.NetworkSend()});
     }
 
     public ValueTask DisposeAsync(){_process?.Dispose();_perf.Dispose();return ValueTask.CompletedTask;}
