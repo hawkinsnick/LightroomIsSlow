@@ -1,6 +1,6 @@
 name: Windows package
 on:
-  workflow_dispatch:
+  workflow_dispatch:\n    inputs:\n      channel:\n        description: 'Build channel'\n        required: true\n        default: 'validation'\n        type: choice\n        options: [validation, release]
   push:
     tags: [ 'v*' ]
 jobs:
