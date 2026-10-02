@@ -19,9 +19,9 @@ public sealed class DiagnosticEngine
                     ["Investigate the physical drive hosting the Lightroom catalog, previews, cache, and active originals before considering CPU upgrades."]));
         }
 
-        var memoryPressure = samples.Count(s => s.MemoryAvailableMb is < 1024 && s.MemoryHardFaultsPerSecond is > 10);
+        var memoryPressure = samples.Count(s => s.MemoryAvailableMb is < 1024 && s.MemoryPageReadsPerSecond is > 10);
         if (memoryPressure >= samples.Count * .20)
-            findings.Add(new("MEMORY_PRESSURE","Memory pressure observed","Low available memory coincided with sustained hard faults.",FindingSeverity.High,FindingConfidence.High,
+            findings.Add(new("MEMORY_PRESSURE","Memory pressure observed","Low available memory coincided with sustained paging reads.",FindingSeverity.High,FindingConfidence.High,
                 [$"Pressure samples: {memoryPressure}/{samples.Count}"],[],["Reduce concurrent memory demand or evaluate additional RAM."]));
 
         var cpuSat = samples.Count(s => s.CpuSystemPercent is >= 90);
