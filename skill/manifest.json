@@ -1,6 +1,6 @@
 {
   "name": "lightroom-is-slow",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "schema_versions": [
     "2.0"
   ],
@@ -14,7 +14,8 @@
     "knowledge/lightroom/workloads.json",
     "knowledge/lightroom/experiments.json",
     "skill/SKILL.md",
-    "skill/tools.json"
+    "skill/tools.json",
+    "skill/protocol.json"
   ],
   "generated_from_repository": true
 }
