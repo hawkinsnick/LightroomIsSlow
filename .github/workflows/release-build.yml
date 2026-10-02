@@ -1,8 +1,18 @@
 name: Windows package
 on:
-  workflow_dispatch:\n    inputs:\n      channel:\n        description: 'Build channel'\n        required: true\n        default: 'validation'\n        type: choice\n        options: [validation, release]
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Build channel
+        required: true
+        default: validation
+        type: choice
+        options:
+          - validation
+          - release
   push:
-    tags: [ 'v*' ]
+    tags:
+      - 'v*'
 jobs:
   package:
     runs-on: windows-latest
