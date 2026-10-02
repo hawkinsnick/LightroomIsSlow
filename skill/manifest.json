@@ -1,0 +1,1 @@
+{"name":"lightroom-is-slow","version":"0.1.0","schema_versions":["2.0"],"platforms":["windows","macos"],"canonical_sources":["schema/session.schema.json","schema/telemetry-sample.schema.json","knowledge/lightroom/workloads.json","skill/SKILL.md"],"generated_from_repository":true}
