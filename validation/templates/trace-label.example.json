@@ -1,0 +1,1 @@
+{"session_id":"replace-with-session-id","platform":"windows","lightroom_product":"classic","workload":"develop_editing","observer_experience":"slow","slowdown_marked":true,"reproduced":true,"notes":"Visible stall while moving between edited images; label recorded before reviewing engine output.","reviewed_engine_output_after_label":true}
