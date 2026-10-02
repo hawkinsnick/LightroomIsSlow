@@ -1,0 +1,3 @@
+using LightroomIsSlow.Core.Baselines;using LightroomIsSlow.Core.Models;
+namespace LightroomIsSlow.Core.Tests;
+public sealed class BaselineAnalyzerTests{[Fact]public void BaselineIsMachineLocalComparisonNotGlobalBenchmark(){var s=Enumerable.Range(0,10).Select(i=>new TelemetrySample{TimestampUtc=DateTimeOffset.UnixEpoch.AddSeconds(i),SessionId="b",CpuSystemPercent=20,DiskReadLatencyMs=4,MemoryAvailableMb=8000}).ToArray();var a=new BaselineAnalyzer();var b=a.Build("lightroom",WorkloadKind.Export,[s,s]);var c=s.Select(x=>x with{CpuSystemPercent=40}).ToArray();Assert.Contains(a.Compare(b,c),x=>x.Metric=="cpu.system"&&x.DifferencePercent>0);}}
