@@ -18,15 +18,19 @@ jobs:
           test -f schema/session.schema.json
           test -f schema/telemetry-sample.schema.json
           test -f knowledge/lightroom/workloads.json
+          test -f knowledge/lightroom/experiments.json
+          test -f skill/tools.json
           python -m json.tool skill/manifest.json >/dev/null
           python -m json.tool schema/session.schema.json >/dev/null
           python -m json.tool schema/telemetry-sample.schema.json >/dev/null
           python -m json.tool knowledge/lightroom/workloads.json >/dev/null
+          python -m json.tool knowledge/lightroom/experiments.json >/dev/null
+          python -m json.tool skill/tools.json >/dev/null
       - name: Assemble skill package
         shell: bash
         run: |
           mkdir -p artifacts/lightroom-is-slow-skill/schema artifacts/lightroom-is-slow-skill/knowledge/lightroom
-          cp skill/SKILL.md skill/manifest.json artifacts/lightroom-is-slow-skill/
+          cp skill/SKILL.md skill/manifest.json skill/tools.json artifacts/lightroom-is-slow-skill/
           cp schema/*.json artifacts/lightroom-is-slow-skill/schema/
           cp knowledge/lightroom/*.json artifacts/lightroom-is-slow-skill/knowledge/lightroom/
           printf '%s\n' "$GITHUB_SHA" > artifacts/lightroom-is-slow-skill/SOURCE_COMMIT
