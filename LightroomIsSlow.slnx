@@ -2,6 +2,7 @@
   <Project Path="src/LightroomIsSlow.Core/LightroomIsSlow.Core.csproj" />
   <Project Path="src/LightroomIsSlow.Windows/LightroomIsSlow.Windows.csproj" />
   <Project Path="src/LightroomIsSlow.Cli/LightroomIsSlow.Cli.csproj" />
+  <Project Path="src/LightroomIsSlow.Mac/LightroomIsSlow.Mac.csproj" />
   <Project Path="src/LightroomIsSlow.App/LightroomIsSlow.App.csproj" />
   <Project Path="tests/LightroomIsSlow.Core.Tests/LightroomIsSlow.Core.Tests.csproj" />
 </Solution>
