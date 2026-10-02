@@ -1,0 +1,2 @@
+namespace LightroomIsSlow.Core.Orchestration;
+public enum DiagnosticCommand{InspectEnvironment,DetectLightroom,StartSession,StopSession,AnalyzeSession,ExplainFinding,CompareSessions,CreateSupportBundle,RecommendNextTest}
