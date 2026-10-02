@@ -1,13 +1,13 @@
 using System.Management;using Microsoft.Win32;using LightroomIsSlow.Core.Abstractions;using LightroomIsSlow.Core.Models;
 namespace LightroomIsSlow.Windows.Health;
-public sealed class WindowsHealthProvider:IWindowsHealthProvider
+public sealed class WindowsHealthProvider:IPlatformHealthProvider
 {
- public WindowsHealthSnapshot Capture()
+ public PlatformHealthSnapshot Capture()
  {
   var warnings=new List<string>();var free=DriveFree();var pending=Pending();var update=LatestUpdate();var power=Power();
   if(free is <10)warnings.Add("System drive has less than 10% free space.");
   if(pending==true)warnings.Add("Windows indicates that a reboot is pending.");
-  return new(){CapturedUtc=DateTimeOffset.UtcNow,WindowsProductName=Reg(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion","ProductName"),DisplayVersion=Reg(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion","DisplayVersion"),Build=Reg(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion","CurrentBuildNumber"),LastBootUtc=Boot(),PendingReboot=pending,LatestInstalledUpdateUtc=update.date,InstalledUpdateCount=update.count,ActivePowerPlan=power,SystemDriveFreePercent=free,DefenderRealtimeProtectionEnabled=Defender("RealTimeProtectionEnabled"),DefenderAntivirusEnabled=Defender("AntivirusEnabled"),Warnings=warnings};
+  return new(){Platform=PlatformKind.Windows,CapturedUtc=DateTimeOffset.UtcNow,OsName=Reg(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion","ProductName"),OsVersion=Reg(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion","DisplayVersion"),OsBuild=Reg(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion","CurrentBuildNumber"),LastBootUtc=Boot(),PendingRestart=pending,LatestInstalledUpdateUtc=update.date,InstalledUpdateCount=update.count,PowerMode=power,SystemDriveFreePercent=free,SecurityState=new Dictionary<string,string?>{{"defender_realtime",Defender("RealTimeProtectionEnabled")?.ToString()},{"defender_antivirus",Defender("AntivirusEnabled")?.ToString()}},Warnings=warnings};
  }
  static string? Reg(string k,string n){try{return Registry.LocalMachine.OpenSubKey(k)?.GetValue(n)?.ToString();}catch{return null;}}
  static DateTimeOffset? Boot(){try{using var q=new ManagementObjectSearcher("SELECT LastBootUpTime FROM Win32_OperatingSystem");var v=q.Get().Cast<ManagementObject>().FirstOrDefault()?["LastBootUpTime"]?.ToString();return v is null?null:new DateTimeOffset(ManagementDateTimeConverter.ToDateTime(v));}catch{return null;}}
