@@ -21,7 +21,7 @@ public sealed class DiagnosticEngineTests
     {
         var samples=Enumerable.Range(0,20).Select(i=>new TelemetrySample{
             TimestampUtc=DateTimeOffset.UtcNow.AddSeconds(i),SessionId="x",
-            CpuSystemPercent=30,DiskReadLatencyMs=2,DiskQueueDepth=.1,MemoryAvailableMb=8192,MemoryHardFaultsPerSecond=0
+            CpuSystemPercent=30,DiskReadLatencyMs=2,DiskQueueDepth=.1,MemoryAvailableMb=8192,MemoryPageReadsPerSecond=0
         }).ToArray();
         var result=new DiagnosticEngine().Evaluate(samples);
         Assert.Single(result);
