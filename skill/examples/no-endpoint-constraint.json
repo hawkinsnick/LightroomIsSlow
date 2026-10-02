@@ -1,0 +1,1 @@
+{"session_schema":"2.0","finding":{"code":"NO_ENDPOINT_CONSTRAINT","confidence":"medium","evidence":[],"counter_evidence":["Absence of evidence is not proof that Lightroom was responsive."]},"expected_behavior":{"diagnose":false,"recommend_next_test":"MARK_OBSERVED_STALL"}}
