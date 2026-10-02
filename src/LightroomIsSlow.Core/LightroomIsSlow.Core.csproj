@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
+  <PropertyGroup><TargetFramework>net8.0</TargetFramework>
     <AssemblyName>LightroomIsSlow.Core</AssemblyName>
     <RootNamespace>LightroomIsSlow.Core</RootNamespace>
   </PropertyGroup>
