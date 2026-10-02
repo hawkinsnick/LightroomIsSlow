@@ -24,7 +24,7 @@ public sealed class WindowsTelemetryCollector : ITelemetryCollector
         GlobalMemoryStatusEx(out var mem);
         _lastAt=now;
         return ValueTask.FromResult(new TelemetrySample{TimestampUtc=now,SessionId=sessionId,LightroomProcessId=_target?.ProcessId,CpuSystemPercent=scpu,CpuLightroomPercent=pcpu,MemoryAvailableMb=mem.ullAvailPhys/1048576d,MemoryCommitPercent=mem.ullTotalPageFile==0?null:(mem.ullTotalPageFile-mem.ullAvailPageFile)*100d/mem.ullTotalPageFile,
-            MemoryHardFaultsPerSecond=PerformanceCounterSet.Read(_perf.Faults),
+            MemoryPageReadsPerSecond=PerformanceCounterSet.Read(_perf.Faults),
             DiskReadBytesPerSecond=PerformanceCounterSet.Read(_perf.DR),DiskWriteBytesPerSecond=PerformanceCounterSet.Read(_perf.DW),
             DiskReadLatencyMs=PerformanceCounterSet.Read(_perf.DRL,1000),DiskWriteLatencyMs=PerformanceCounterSet.Read(_perf.DWL,1000),DiskQueueDepth=PerformanceCounterSet.Read(_perf.DQ),
             GpuComputePercent=PerformanceCounterSet.Read(_perf.GU),GpuVramUsedMb=PerformanceCounterSet.Read(_perf.GD,1d/1048576),
