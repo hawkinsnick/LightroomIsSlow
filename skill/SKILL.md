@@ -23,5 +23,11 @@ Use `knowledge/lightroom/workloads.json` for workload expectations. High CPU dur
 ## Inputs
 Prefer Diagnostic Schema 2.0 sessions, structured findings, and privacy-safe support bundles.
 
+## Active diagnostics
+When deterministic findings are insufficient, conflicting, or show no demonstrated endpoint constraint, use the experiment knowledge and `recommend_next_test` capability to guide the smallest useful follow-up measurement. Never turn uncertainty into a diagnosis.
+
+## Synchronization
+This skill is generated from the repository source package. Treat the embedded SOURCE_COMMIT as the authoritative revision identity; schema, knowledge, tools, and skill instructions must be rebuilt together on repository updates.
+
 ## Output
 Explain: finding, confidence, supporting evidence, counter-evidence, unknowns, health context, recommended action, and next diagnostic test when needed.
