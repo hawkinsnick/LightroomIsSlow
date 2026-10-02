@@ -11,6 +11,6 @@ public sealed record SessionMetadata
     public ProcessIdentity? LightroomProcess { get; init; }
     public string? WorkloadLabel { get; init; }
     public SystemInventory? System { get; init; }
-    public WindowsHealthSnapshot? WindowsHealth { get; init; }
+    public PlatformHealthSnapshot? PlatformHealth { get; init; }
     public IReadOnlyList<MetricProvenance> Provenance { get; init; } = [];
 }
