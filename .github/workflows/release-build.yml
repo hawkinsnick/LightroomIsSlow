@@ -12,10 +12,18 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - run: dotnet test LightroomIsSlow.slnx -c Release
-      - run: dotnet publish src/LightroomIsSlow.App/LightroomIsSlow.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/win-x64
+      - run: dotnet publish src/LightroomIsSlow.App/LightroomIsSlow.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o artifacts/win-x64
+      - shell: pwsh
+        run: |
+          $exe = Get-Item artifacts/win-x64/LightroomIsSlow.exe
+          if ($exe.Length -lt 1000000) { throw "Published executable is unexpectedly small." }
       - shell: pwsh
         run: Compress-Archive -Path artifacts/win-x64/* -DestinationPath artifacts/LightroomIsSlow-win-x64.zip
+      - shell: pwsh
+        run: (Get-FileHash artifacts/LightroomIsSlow-win-x64.zip -Algorithm SHA256).Hash + "  LightroomIsSlow-win-x64.zip" | Set-Content artifacts/LightroomIsSlow-win-x64.sha256
       - uses: actions/upload-artifact@v4
         with:
           name: LightroomIsSlow-win-x64
-          path: artifacts/LightroomIsSlow-win-x64.zip
+          path: |
+            artifacts/LightroomIsSlow-win-x64.zip
+            artifacts/LightroomIsSlow-win-x64.sha256
