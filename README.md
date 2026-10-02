@@ -74,3 +74,12 @@ LightroomIsSlow is designed for local endpoint diagnosis. It should not collect 
 ## Version
 
 Current development line: **0.9.x pre-1.0 validation**
+
+
+## Validation status
+
+LightroomIsSlow is pre-1.0 diagnostic software. Synthetic/adversarial tests check internal rule consistency, but diagnostic thresholds are not yet externally validated on a representative real-world Lightroom trace set.
+
+Real-trace validation materials live in `validation/`. Use **Mark Slowdown** during a visible stall and record the observer label before reviewing the engine result. Windows validation builds are produced by the `Windows package` workflow and include a SHA-256 checksum.
+
+Measurement quality matters: some signals are process-attributed, while others (notably current PhysicalDisk and aggregate network counters) are contextual system measurements. The application must not describe contextual telemetry as proof of Lightroom causation.
